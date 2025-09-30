@@ -5,19 +5,18 @@ on:
     branches:
       - master
       - develop
-      - '4.x'
-      - '5.x'
-      - '5.0'
+      - "4.x"
+      - "5.x"
+      - "5.0"
     paths-ignore:
-      - '*.md'
+      - "*.md"
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Cancel in progress workflows
-# in the scenario where we already had a run going for that PR/branch/tag but then triggered a new run
+# Cancel in progress workflows if a new push happens
 concurrency:
   group: "${{ github.workflow }} ✨ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
@@ -27,17 +26,15 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
-
+          node-version: "lts/*"
       - name: Install dependencies
         run: npm install --ignore-scripts --include=dev
-
       - name: Run lint
         run: npm run lint
 
@@ -48,39 +45,30 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node-version: [18, 19, 20, 21, 22, 23, 24]
         # Node.js release schedule: https://nodejs.org/en/about/releases/
-
     name: Node.js ${{ matrix.node-version }} - ${{matrix.os}}
-
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
       - name: Configure npm loglevel
-        run: |
-          npm config set loglevel error
+        run: npm config set loglevel error
         shell: bash
-
       - name: Install dependencies
         run: npm install
-
       - name: Output Node and NPM versions
         run: |
           echo "Node.js version: $(node -v)"
           echo "NPM version: $(npm -v)"
-
       - name: Run tests
         shell: bash
         run: npm run test-ci
-
       - name: Upload code coverage
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-node-${{ matrix.node-version }}-${{ matrix.os }}
           path: ./coverage/lcov.info
@@ -93,25 +81,33 @@ jobs:
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-
       - name: Install lcov
         shell: bash
         run: sudo apt-get -y install lcov
-
       - name: Collect coverage reports
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@v4
         with:
           path: ./coverage
           pattern: coverage-node-*
-
       - name: Merge coverage reports
         shell: bash
         run: find ./coverage -name lcov.info -exec printf '-a %q\n' {} \; | xargs lcov -o ./lcov.info
-
       - name: Upload coverage report
-        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
+        uses: coverallsapp/github-action@v2
         with:
           file: ./lcov.info
+
+  deploy:
+    needs: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      - name: 🚀 Mock Deployment
+        run: |
+          echo "Starting deployment..."
+          echo "Deploying application to staging environment..."
+          echo "✅ Deployment completed successfully!"
