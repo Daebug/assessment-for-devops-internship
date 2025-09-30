@@ -1,8 +1,8 @@
-**🚀 Steps Implemented
-**
+🚀 Steps Implemented
 
-**Project Setup
-**
+
+Project Setup
+
 Initialized Node.js project (npm init -y).
 
 Added scripts in package.json:
@@ -15,8 +15,8 @@ lint → check code style with ESLint
 
 
 
-**Testing
-**
+Testing
+
 Created test.js to verify the app runs.
 
 Configured Mocha + NYC for test execution and coverage reporting.
@@ -31,17 +31,11 @@ Deploy job → mock deployment (simple echo commands).
 
 
 
-**📂 Run Locally
-**
+📂 Run Locally
 
-# install dependencies
 
 npm install
 
-# run lint
-
 npm run lint
-
-# run tests
 
 npm test
